@@ -41,26 +41,45 @@ font-size: 18px;
 </head>
 
 <body>
-    
-<button onclick="zmienkolory()">zmien kolory</button>
-<span id="insertmethod"></span>
-<select id="select-method" name="select-method">
-<option value="0"></option>
-<option value="1"></option>
-<option value="2"></option>
-<option value="3"></option>
-<option value="4"></option>
-</select>
-<div id="kont0"  style="width: 100px; height: 100px; position: absolute; background-color:#E8EDF2">
-  <div id="paka0" style="width: 0px; height: 0px; color: white; text-align: center; position: absolute; overflow: hidden; display:table-cell; vertical-align:middle; background-color:#8A2BE2"
-        ondblclick="change_color(event)" onclick="showTip(event)" onmouseout="hideTip(event)">to <br> tu i tu
- </div>
-  <div id="empty0" style="width: 0px; height: 0px; position: absolute; background-color:#8A2BE2"></div>
-</div>
-<div class="opis" id="opis0">
-    <div class="kolor" id="kwadrat0"></div>
-    <div class="kolor_opis" id="kolor_opis0"></div>
-</div>
+    <div id="message"></div>
+    <div>    
+        Dimensions of the container: 
+        <input id="tank_h" name="tank_height" value=""> 
+        x 
+        <input id="tank_w" name="tank_width"  value=""> cm x cm
+        <button name="add_tank" id="add_tank">Add container</button>
+    </div>
+    <div>    
+        Add box: 
+        Box name: <input id="box_name" name="box_name" value="">
+        <input id="box_h" name="box_height" value=""> x <input id="box_w" name="box_width"  value=""> cm x cm
+        <button name="add_box" id="add_box">Add box</button>
+    </div>     
+    <div>List boxes:
+        <ul id="boxes_list">
+            
+        </ul>
+    </div>
+        
+    <button onclick="zmienkolory()">zmien kolory</button>
+    <span id="insertmethod"></span>
+    <select id="select-method" name="select-method">
+    <option value="0"></option>
+    <option value="1"></option>
+    <option value="2"></option>
+    <option value="3"></option>
+    <option value="4"></option>
+    </select>
+    <div id="kont0"  style="width: 100px; height: 100px; position: absolute; background-color:#E8EDF2">
+    <div id="paka0" style="width: 0px; height: 0px; color: white; text-align: center; position: absolute; overflow: hidden; display:table-cell; vertical-align:middle; background-color:#8A2BE2"
+            ondblclick="change_color(event)" onclick="showTip(event)" onmouseout="hideTip(event)">to <br> tu i tu
+    </div>
+    <div id="empty0" style="width: 0px; height: 0px; position: absolute; background-color:#8A2BE2"></div>
+    </div>
+    <div class="opis" id="opis0">
+        <div class="kolor" id="kwadrat0"></div>
+        <div class="kolor_opis" id="kolor_opis0"></div>
+    </div>
     
 <script type="text/javascript">
 

@@ -1,4 +1,116 @@
 //TODO: add form to add tank and boxes
+document.addEventListener("DOMContentLoaded", function(event) {
+//	console.log('ready');
+	//var container;
+	
+	//Getting container dimensions
+	var container_btn = document.getElementById('add_tank');
+	function write_tank_dimensions(){
+		tank_w = document.getElementById('tank_w').value;
+		tank_h = document.getElementById('tank_h').value;
+		BinPackerPrepareModules.tank.build(tank_w,tank_h);
+		console.log(BinPackerPrepareModules.tank);
+		//return BinPackerPrepareModules;
+		//TODO: sprawdzenie czy wprowadzono dane liczbowe
+	}
+	container_btn.addEventListener('click',write_tank_dimensions);
+	//Getting container dimensions  -END-
+	
+	//Get all boxes
+	var box_btn = document.getElementById('add_box');
+	function write_boxes_dimensions(){
+		box_w = document.getElementById('box_w').value;
+		box_h = document.getElementById('box_h').value;
+		box_name = document.getElementById('box_name').value;
+		if(BinPackerPrepareModules.boxes.build(box_name,box_w,box_h))
+		{
+			console.log(BinPackerPrepareModules.boxes.tmpSet);
+			//show_list_of_boxes();
+			add_to_displayed_list_of_boxes(box_name,box_w,box_h,BinPackerPrepareModules.boxes.tmpSet.length)
+		}
+		
+	}
+	box_btn.addEventListener('click',write_boxes_dimensions);
+    //Get all boxes -END-
+//TODO:  możliwość usunięcia danego i edytowania
+	// Show list of boxes
+	var box_list_el = document.getElementById('boxes_list');
+	function show_list_of_boxes(){
+		box_list_el.innerHTML = "";
+		for(let i = 0, len = BinPackerPrepareModules.boxes.tmpSet.length; i < len; i ++){
+			
+			let li = document.createElement('li');
+
+			li.innerText = 'Name: ' + BinPackerPrepareModules.boxes.tmpSet[i].name;
+			box_list_el.appendChild(li);
+		}
+	}
+
+	// Show list of boxes - END -
+	// Add to displayed list
+	function add_to_displayed_list_of_boxes(box_name,box_w,box_h,alternate_name){
+					
+		let li = document.createElement('li');
+		li.setAttribute('data-box-index',alternate_name-1);
+		li.setAttribute('class','b_list');
+		if(!box_name){box_name = alternate_name}//name of box is not required, if not add default
+		li.innerText = '[' + box_name + '] ' + box_h + ' x ' + box_w;
+		box_list_el.appendChild(li);
+		add_event_listener_to_list(all_boxes_nodes,'click',show_hide_input,remember_last_node); //reload event listener after adding every element
+	//	add_event_listener_to_list(all_boxes_nodes,'focusout',show_hide_input());
+	}
+	// Add to displayed list - END - 
+	// add event listener to list
+	function add_event_listener_to_list(list,event,fn){
+		for(let i = 0, len = list.length; i < len; i ++ )
+		{
+			list[i].addEventListener(event, fn);
+		}
+	}
+	var all_boxes_nodes = document.getElementsByClassName('b_list');
+	var remember_last_node = [];
+	// add event listener to list - END -
+	// show input and delete link for list elements
+	function show_hide_input(){
+		//remember previous and current node with innerText
+		let tmpObj = {node: this, t: this.innerText}
+		//if third node clicked
+		if(remember_last_node.push(tmpObj)&&remember_last_node.length>2){
+		//there can be only previous and current clicked box	
+			remember_last_node.splice(0,1);//delete first element of array if there are more than 2 elements
+		}
+		//this.innerText = '';
+		let i = this.dataset.boxIndex;//index of list array
+		//get default values of selected list element
+	
+		let default_values = {
+			name: BinPackerPrepareModules.boxes.tmpSet[i].name,
+			width: BinPackerPrepareModules.boxes.tmpSet[i].width,
+			height: BinPackerPrepareModules.boxes.tmpSet[i].height,
+		};
+		this.innerHTML = '<input id="edit_box_name" name="b_name" value="'+default_values.name +'">'+
+		'<input id="edit_box_h" name="box_h" value="'+default_values.height +'">'+
+		'<input id="edit_box_w" name="box_w" value="'+default_values.width +'">'+
+		' <button id="delete_box" name="delete_box" data-del-box="'+i+'">DEL</button>'+
+		' <button id="save_box" name="save_box" data-save-box="'+i+'">SAVE</button>';
+		//TODO: after timeout addeventlistener to buttons with fn changing or destroying box
+		
+		
+		console.log(that);
+		document.addEventListener('click',function(e){
+			console.log(remember_last_node);
+			if(remember_last_node.length>1)
+			{
+				remember_last_node[0].node.innerHTML = '';
+				remember_last_node[0].node.innerText = remember_last_node[0].t;
+			}
+			
+		});
+		
+	}
+	//// show input and delete link for list elements - END -
+  });
+
 
 var BinPackerPrepareModules = (function (){
 	var modules = {};
@@ -12,6 +124,8 @@ var BinPackerPrepareModules = (function (){
 		return modules[name];
 	}
 	var tank = {
+		width: {},
+		height: {},
 		build: function(width,height){
 			this.x = 0;
 			this.y = 0;
@@ -26,8 +140,29 @@ var BinPackerPrepareModules = (function (){
 	var boxes = {
 		tmpSet: [],
 		build: function(name,width,height){
-			if(name === null){name = this.tmpSet.length;}//default incremental name if name was not set
-			this.tmpSet.push({name: name,width: width,height: height})
+			let message;
+			message = document.getElementById("message");
+			message.innerHTML = "";
+			try{
+				if(Number.isInteger(Number(width))&&Number.isInteger(Number(height)))
+				{ 
+					if(!name){name = this.tmpSet.length + 1;}//default incremental name if name was not set
+					this.tmpSet.push({name: name,width: width,height: height});
+				
+					return true;
+				}
+				else	
+				{
+					throw "dimension is not an integer!";
+				}
+			}
+			catch(err){
+				message.innerHTML = "Input " + err;
+			}
+			finally{
+
+			}
+
 		}
 	}
 //inicjacja obiektow zapakowanych pudelek oraz jeszcze wolne
@@ -138,6 +273,7 @@ var BinPackerPrepareModules = (function (){
 	}
   return {
 	boxes: boxes,
+	tank: tank,
 	define: define,
 	get: get
   };
