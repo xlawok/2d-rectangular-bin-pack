@@ -1,3 +1,148 @@
+//TODO: add form to add tank and boxes
+
+var BinPackerPrepareModules = (function (){
+	var modules = {};
+	function define(name, deps, impl) {
+		for (var i=0; i<deps.length; i++) {
+			deps[i] = modules[deps[i]];
+		}
+		modules[name] = impl.apply( impl, deps );
+	}
+	function get(name) {
+		return modules[name];
+	}
+	var tank = {
+		build: function(width,height){
+			this.x = 0;
+			this.y = 0;
+			this.width = width;
+			this.height = height;
+
+		}
+	}
+	
+	//build boxes set from a form BinPackerPrepareModules.boxes.build("zz",200,100);
+	// get boxes set BinPackerPrepareModules.boxes.tmpSet;
+	var boxes = {
+		tmpSet: [],
+		build: function(name,width,height){
+			if(name === null){name = this.tmpSet.length;}//default incremental name if name was not set
+			this.tmpSet.push({name: name,width: width,height: height})
+		}
+	}
+//inicjacja obiektow zapakowanych pudelek oraz jeszcze wolne
+	var   usedBoxes = [],
+	freeBoxes = []
+	cargo = [];
+	var that,tmpBoxes;
+	var insertMethods = ["RectBestShortSideFit",
+						"RectBestLongSideFit",
+						"RectBestAreaFit",
+						"RectBottomLeftRule",
+						"RectContactPointRule"];
+	// przesiewanie pudeĂĹĄĂÂ za duĂĹĄÄšĹych oraz o rozmiarze 0
+	var oversized = {
+		
+		delOversized: function(obj,kontener)
+		{
+		that = this;// wlasciwe okreslenie scope, kolejne zagniezdzenie this w metodzie testAndSaveOversized
+		//powodowalo przeniesienei this
+		paczki = obj.filter(that.testAndSaveOversized);
+		
+			
+		},
+		testAndSaveOversized: function(value)
+		{
+		
+		//wskazuje przy pomocy helperĂÂÄšÂw ktĂÂÄšÂe paczki za duze i wtedy dodawane do oversizedList else zwraca wartosc
+		if(that.getOversized(value) || that.getUndersized(value))
+			{
+				console.log('paczka \'' + value.name + '\' jest wi?ksza ni? kontener lub jeden z jej wymiar?w wynosi 0'); //wykazanie paczki przekraczajacej wymiary
+				that.oversizedList.push(value); // zapisanie przewymiarowanych
+			}
+			else
+			{
+				return value;
+			}
+		},
+		
+		getOversized: function(value)
+		{
+	
+		//helper dla delOversized, wskazuje paczki za du?e na kontener
+		
+			if((value.w > kontener.width || value.w > kontener.height) && (value.h > kontener.width || value.h > kontener.height))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		},
+		getUndersized: function(obj_pack)
+		{
+		//helper dla paczek, gdzie kt?rykolwiek wymiar wynosi "0"
+			if(obj_pack.w === 0 || obj_pack.h === 0)
+			{
+			return true;
+			}
+		},
+		oversizedList: [],//przewymiarowane
+		
+	}
+	// sortowanie
+	var sorting = {
+		saveRotated: function(arr)
+						{
+						//obr?t paczki kr?tszy bok staje si? d?ugo?ci? width
+						var r_width, r_height;// pomocnicze zmienne, zapami?tanie szeroko?ci i wysokosci
+						arr = arr.map(this.rotate)
+	
+					},
+		rotate: function (value){
+						//podmiana h i w 
+						r_width = value.w;
+						r_height = value.h;
+						if(r_width > r_height)
+						{
+							//obr?t paczki
+							value.w = r_height;
+							value.h = r_width;
+						}
+		},
+		sortDescending: function (arr)
+						{
+						//sortowanie kr?tszym bokiem malej?co 
+						//gdy r?wne wtedy d?u?szym bokiem malej?co
+						arr.sort(function (a, b) 
+						{
+							if(a.w == b.w)
+							{
+							return b.h - a.h;  
+							}
+							else
+							{
+							return b.w - a.w;
+							}
+						});
+					},
+	}
+	var scoring = {
+		score1: Number.MAX_SAFE_INTEGER,
+		score2: Number.MAX_SAFE_INTEGER,
+		
+	
+	
+	
+	}
+  return {
+	boxes: boxes,
+	define: define,
+	get: get
+  };
+})();
+
 //prototyp kontenera
 function Tank(width,height){
     this.x = 0;
