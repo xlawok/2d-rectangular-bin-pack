@@ -40,10 +40,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		for(let i = 0, len = BinPackerPrepareModules.boxes.tmpSet.length; i < len; i ++){
 			
 			let li = document.createElement('li');
-
-			li.innerText = 'Name: ' + BinPackerPrepareModules.boxes.tmpSet[i].name;
+			let box_name = BinPackerPrepareModules.boxes.tmpSet[i].name;
+			let box_h = BinPackerPrepareModules.boxes.tmpSet[i].height;
+			let box_w = BinPackerPrepareModules.boxes.tmpSet[i].width;
+			li.setAttribute('data-box-index',i);
+			li.setAttribute('id',i);
+			li.setAttribute('class','b_list');
+			li.innerText = 'Name: ' + box_name;
+			li.innerText = '[' + box_name + '] ' + box_h + ' x ' + box_w;
 			box_list_el.appendChild(li);
 		}
+		all_boxes_nodes = document.getElementsByClassName('b_list');
+		add_event_listener_to_list(all_boxes_nodes,'click',show_hide_input,remember_last_node); //after refresh
 	}
 
 	// Show list of boxes - END -
@@ -52,12 +60,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
 					
 		let li = document.createElement('li');
 		li.setAttribute('data-box-index',alternate_name-1);
+		li.setAttribute('id',alternate_name-1);
 		li.setAttribute('class','b_list');
 		if(!box_name){box_name = alternate_name}//name of box is not required, if not add default
 		li.innerText = '[' + box_name + '] ' + box_h + ' x ' + box_w;
 		box_list_el.appendChild(li);
 		add_event_listener_to_list(all_boxes_nodes,'click',show_hide_input,remember_last_node); //reload event listener after adding every element
-	//	add_event_listener_to_list(all_boxes_nodes,'focusout',show_hide_input());
+	
 	}
 	// Add to displayed list - END - 
 	// add event listener to list
@@ -74,13 +83,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	function show_hide_input(){
 		//remember previous and current node with innerText
 		let tmpObj = {node: this, t: this.innerText}
-		//if third node clicked
-		if(remember_last_node.push(tmpObj)&&remember_last_node.length>2){
-		//there can be only previous and current clicked box	
-			remember_last_node.splice(0,1);//delete first element of array if there are more than 2 elements
+		this.removeEventListener('click',show_hide_input);
+		if(remember_last_node.length==0)
+		{ 
+			remember_last_node.push(tmpObj);
 		}
-		//this.innerText = '';
-		let i = this.dataset.boxIndex;//index of list array
+	
+		if((remember_last_node.length==1&&this.id!=remember_last_node[0].node.id)||(remember_last_node.length>1&&this.id!=remember_last_node[1].node.id)) {
+			
+			remember_last_node[0].node.addEventListener('click',show_hide_input);
+			if(remember_last_node.push(tmpObj)&&remember_last_node.length>2){ //if third node clicked
+			 remember_last_node.splice(0,1);
+				//there can be only previous and current clicked box	
+					//delete first element of array if there are more than 2 elements
+			}
+		}
+		
+		
+		
+		let i = this.id;//index of list array
 		//get default values of selected list element
 	
 		let default_values = {
@@ -91,23 +112,52 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		this.innerHTML = '<input id="edit_box_name" name="b_name" value="'+default_values.name +'">'+
 		'<input id="edit_box_h" name="box_h" value="'+default_values.height +'">'+
 		'<input id="edit_box_w" name="box_w" value="'+default_values.width +'">'+
-		' <button id="delete_box" name="delete_box" data-del-box="'+i+'">DEL</button>'+
-		' <button id="save_box" name="save_box" data-save-box="'+i+'">SAVE</button>';
+		' <button id="delete_box_'+i+'" name="delete_box" data-del-box="'+i+'">DEL</button>'+
+		' <button id="save_box_'+i+'" name="save_box" data-save-box="'+i+'">SAVE</button>';
 		//TODO: after timeout addeventlistener to buttons with fn changing or destroying box
 		
 		
-		console.log(that);
-		document.addEventListener('click',function(e){
-			console.log(remember_last_node);
+		//hide previous input if another clicked
+		
 			if(remember_last_node.length>1)
 			{
 				remember_last_node[0].node.innerHTML = '';
 				remember_last_node[0].node.innerText = remember_last_node[0].t;
+				console.log(remember_last_node[0].node.id + ' '+ remember_last_node[1].node.id);
 			}
-			
-		});
 		
+		function remove_box(){
+			let box_id = this.dataset.delBox;
+			this.removeEventListener('click',remove_box,true);
+			remember_last_node[0].node.removeEventListener('click',show_hide_input,true);
+			if(BinPackerPrepareModules.boxes.tmpSet.splice(box_id,1)){
+				
+				show_list_of_boxes();
+			}
+		}
+		function save_box(){
+			let box_id = this.dataset.saveBox;
+			this.removeEventListener('click',save_box,true);
+			//remember_last_node[0].node.removeEventListener('click',show_hide_input,true);
+			BinPackerPrepareModules.boxes.tmpSet[box_id].width = document.getElementById('edit_box_w').value;
+			BinPackerPrepareModules.boxes.tmpSet[box_id].height = document.getElementById('edit_box_h').value;
+			BinPackerPrepareModules.boxes.tmpSet[box_id].name = document.getElementById('edit_box_name').value;
+			
+			
+				
+				show_list_of_boxes();
+			
+		}
+	//	setTimeout(function(){
+			let del_btn = document.getElementById('delete_box_'+i);
+			let save_btn = document.getElementById('save_box_'+i);
+			let previous_del_btn = document.getElementById('delete_box_'+remember_last_node[0].node.id);
+		//	previous_del_btn.removeEventListener('click',remove_box);
+			if (del_btn) del_btn.addEventListener('click',remove_box);
+			if (save_btn) save_btn.addEventListener('click',save_box);
+	//	}, 2000);
 	}
+	
 	//// show input and delete link for list elements - END -
   });
 
