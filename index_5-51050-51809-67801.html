@@ -6,25 +6,25 @@
 
 </script>
 <style>
-.opis {
+.description {
 position: relative;
     top: 350px;
     width: 100%;
     border-style: solid;
     border-color: beige;
 }
-.opis:after {
+.description:after {
     content:'';
     display:block;
     clear:both;
 }
-.kolor{
+.colour{
     width:20px;
     height:20px;
     margin: 5px;
     float:left;
 }
-.kolor_opis{
+.colour_d{
     height:20px;
     margin: 5px;
     float:left;       
@@ -54,64 +54,33 @@ font-size: 18px;
         Box name: <input id="box_name" name="box_name" value="">
         <input id="box_h" name="box_height" value=""> x <input id="box_w" name="box_width"  value=""> cm x cm
         <button name="add_box" id="add_box">Add box</button>
-    </div>     
-    <div>List boxes:
+    </div>  
+    <div><button name="prepare" id="prepare" disabled="true"> Prepare boxes</button></div>   
+    <div>Container:<span id="container_dimensions"></span><br/>
+        List boxes:
         <ul id="boxes_list">
             
         </ul>
+        Oversized boxes:
+        <ul id="oversized_boxes_list"></ul>
     </div>
-        
-    <button onclick="zmienkolory()">zmien kolory</button>
-    <span id="insertmethod"></span>
-    <select id="select-method" name="select-method">
-    <option value="0"></option>
-    <option value="1"></option>
-    <option value="2"></option>
-    <option value="3"></option>
-    <option value="4"></option>
-    </select>
-    <div id="kont0"  style="width: 100px; height: 100px; position: absolute; background-color:#E8EDF2">
-    <div id="paka0" style="width: 0px; height: 0px; color: white; text-align: center; position: absolute; overflow: hidden; display:table-cell; vertical-align:middle; background-color:#8A2BE2"
-            ondblclick="change_color(event)" onclick="showTip(event)" onmouseout="hideTip(event)">to <br> tu i tu
+    <button name="insert_boxes"    id="insert_boxes" disabled="true">INSERT BOXES</button>
+    
+    <div id="select_box">
+        <select id="select-method" name="select-method" disabled="true">
+       
+        </select>
     </div>
-    <div id="empty0" style="width: 0px; height: 0px; position: absolute; background-color:#8A2BE2"></div>
-    </div>
-    <div class="opis" id="opis0">
-        <div class="kolor" id="kwadrat0"></div>
-        <div class="kolor_opis" id="kolor_opis0"></div>
+    <div>
+        <canvas id="show_filled_container"></canvas>
+        </div>
+   
+    <div class="description" id="description0">
+        <div class="colour" id="square0"></div>
+        <div class="colour_d" id="colour_d0"></div>
     </div>
     
 <script type="text/javascript">
-
-function showTip(event) {
-    var oDiv = document.getElementById("divTip1");
-    oDiv.style.visibility = "visible";
-    var paka = event.target;
-    paka.style.boxSizing = "border-box";
-    paka.style.border = "2px solid " + getRandomColor();
-    var index = tabeladiv.indexOf(paka);
-    oDiv.innerHTML = chosenCargo[index].name + ": " + paka.style.width + " x " + paka.style.height;
-    console.log(event);
-    oDiv.style.left = event.clientX - event.layerX/2 +"px";
-    oDiv.style.top = event.clientY + 1 +"px";
-    setTimeout(function(){ paka.style.border = "3px solid"}, 50);
-    setTimeout(function(){ paka.style.border = "2px solid"}, 100);
-    setTimeout(function(){ paka.style.border = null}, 150);
-}
-function change_color(event){
-    var paka = event.target;
-    var index = tabeladiv.indexOf(paka);
-    setTimeout(function(){ paka.style.border = "3px solid"
-                           paka.style.background = getRandomColor();
-                           tabelakwadratow[index].style.backgroundColor = tabeladiv[index].style.backgroundColor;
-                         }, 50);
-    setTimeout(function(){ paka.style.border = "2px solid"}, 100);
-    setTimeout(function(){ paka.style.border = null}, 150);
-}    
-function hideTip(oEvent) {
-    var oDiv = document.getElementById("divTip1");
-    oDiv.style.visibility = "hidden";
-}
     
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
@@ -121,116 +90,70 @@ function getRandomColor() {
     }
     return color;    
 }
-var tabeladiv = [];
-var tabelazajetych = [];
-var tabelapustych = [];
-var tabelakwadratow = [];
-var tabelaopisow = [];
-var i = 0;
-var przesuniecie = freeBoxes[i].width + 100;
 
-function duplikacja_zajete() {
-    var original = document.getElementById('paka' + i);
-    var element = document.createElement('div');
-    element.id = "zajete" + i;
-    original.parentNode.appendChild(element);
-}
-    function duplikacja(nazwa) {
-    var original = document.getElementById(nazwa + i);
+var ctx = [];
+
+
+var table_of_squares = [];
+var table_of_description = [];
+var i = 0;
+//var przesuniecie = freeBoxes[i].width + 100;
+
+
+function duplicate(name) {
+    var original = document.getElementById(name + i);
     var clone = original.cloneNode(true);
-    clone.id = nazwa + (i + 1);
+    clone.id = name + (i + 1);
     original.parentNode.appendChild(clone);
 }
-kont0.style.width = kontener.width +"px";
-kont0.style.height = kontener.height +"px"; 
-var divkontener = document.getElementById('kont0');
-//document.getElementById("opis0").style.top = kontener.height + 20 +"px"; //nie jest potrzebne ??
+
+
 function show_cargo(chosenCargo){
     i = 0;
+    var canvas = document.getElementById("show_filled_container");
+    canvas.width = container.width;
+    canvas.height = container.height;
+    canvas.style.backgroundColor = '#E8EDF2';
+    document.getElementById('description0').innerHTML = '<div class="colour" id="square0"></div>'+
+        '<div class="colour_d" id="colour_d0"></div>';
+   // table_of_squares.length = 0;
+   // table_of_description.length = 0;
 	for(i; i < chosenCargo.length; i++){
-        console.log('z');
-		duplikacja('paka');
-        duplikacja_zajete();
-        duplikacja('kwadrat');
-        duplikacja('kolor_opis');
-      /*  if(i<freeBoxes.length){
-            duplikacja('empty');
-            tabelapustych[i] = document.getElementById('empty' + i);
-            tabelapustych[i].style.left = freeBoxes[i].x + przesuniecie +'px';
-            tabelapustych[i].style.top = freeBoxes[i].y +'px';  
-            tabelapustych[i].style.width = freeBoxes[i].width +"px";
-            tabelapustych[i].style.height = freeBoxes[i].height +"px";
-            tabelapustych[i].style.backgroundColor = getRandomColor();
-            };*/
-    
-        tabeladiv[i] = document.getElementById('paka' + i);
-        tabeladiv[i].style.left = chosenCargo[i].x +'px';
-        tabeladiv[i].style.top = chosenCargo[i].y +'px';  
-        tabeladiv[i].style.width = chosenCargo[i].width +"px";
-        tabeladiv[i].style.height = chosenCargo[i].height +"px";
-        tabeladiv[i].style.lineHeight = chosenCargo[i].height/2+"px";
-        tabeladiv[i].innerHTML = chosenCargo[i].name +"<br>"+ chosenCargo[i].width+" x "+chosenCargo[i].height;
-        if (tabeladiv[i].offsetWidth < tabeladiv[i].scrollWidth || tabeladiv[i].offsetHeight < tabeladiv[i].scrollHeight){
-            tabeladiv[i].style.lineHeight = chosenCargo[i].height+"px";
-            tabeladiv[i].innerHTML = chosenCargo[i].name;
-            if (tabeladiv[i].offsetWidth < tabeladiv[i].scrollWidth || tabeladiv[i].offsetHeight < tabeladiv[i].scrollHeight){
-                tabeladiv[i].innerHTML=null;
-                }
-            }
-        tabeladiv[i].style.backgroundColor = getRandomColor();
-     /*   
-        tabelazajetych[i] = document.getElementById('zajete' + i);
-        tabelazajetych[i].style.left = chosenCargo[i].x + przesuniecie +'px';
-        tabelazajetych[i].style.top = chosenCargo[i].y +'px';  
-        tabelazajetych[i].style.width = chosenCargo[i].width +"px";
-        tabelazajetych[i].style.height = chosenCargo[i].height +"px";
-        tabelazajetych[i].style.position = "absolute";
-        tabelazajetych[i].style.backgroundColor = "black";
-        */
-        tabelakwadratow[i] = document.getElementById('kwadrat' + i);
-        tabelakwadratow[i].style.backgroundColor = tabeladiv[i].style.backgroundColor;
+        ctx[i] = canvas.getContext("2d");
+
+       // if(ctx[0]) {ctx[0].rotate(20*Math.PI/180);}
+        let box_kolor = getRandomColor(); 
+        ctx[i].fillStyle = box_kolor;
         
-        tabelaopisow[i] = document.getElementById('kolor_opis' + i);
-        tabelaopisow[i].innerHTML = chosenCargo[i].name + ": " + chosenCargo[i].width +" x "+chosenCargo[i].height;
+        ctx[i].fillRect(chosenCargo[i].x, chosenCargo[i].y, chosenCargo[i].width, chosenCargo[i].height);
+       // ctx[i].fillStyle = 'white';
+      // ctx[i].font = "20px Arial";
+      //  ctx[i].fillText(chosenCargo[i].name,chosenCargo[i].x, chosenCargo[i].y);
+        
+       
+      
+        duplicate('square');
+        duplicate('colour_d');
+     
+        table_of_squares[i] = document.getElementById('square' + i);
+        table_of_squares[i].style.backgroundColor = box_kolor; 
+        
+        table_of_description[i] = document.getElementById('colour_d' + i);
+        table_of_description[i].innerHTML = chosenCargo[i].name + ": " + chosenCargo[i].width +" x "+chosenCargo[i].height;
         
     };
-	
+
 }	
-	/*
-    for(i; i < freeBoxes.length; i++){   //jesli więcej jest kwadratow pustych jak pak
-        duplikacja('empty');
-        tabelapustych[i] = document.getElementById('empty' + i);
-        tabelapustych[i].style.left = freeBoxes[i].x + przesuniecie +'px';
-        tabelapustych[i].style.top = freeBoxes[i].y +'px';  
-        tabelapustych[i].style.width = freeBoxes[i].width +"px";
-        tabelapustych[i].style.height = freeBoxes[i].height +"px";
-        tabelapustych[i].style.backgroundColor = getRandomColor();
-    };
-    */
-function zmienkolory(){
-    var p;
-    for( p=0; p<tabeladiv.length; p++){
-    tabeladiv[p].style.backgroundColor = getRandomColor();
-    tabelakwadratow[p].style.backgroundColor = tabeladiv[p].style.backgroundColor;
-    }
-}
+
+
 
 var select_method = document.getElementById("select-method");
-select_method.addEventListener("change", function(){
-
-//var chosenCargo = cargo[select_method.value].usedBoxes;
-
-divkontener.innerHTML = '<div id=\"paka0\" style=\"width: 0px; height: 0px; color: white; text-align: center; position: absolute; overflow: hidden; display:table-cell; vertical-align:middle; background-color:#8A2BE2\" ondblclick=\"change_color(event)\" onclick=\"showTip(event)\" onmouseout="hideTip(event)\">to <br> tu i tu </div><div id=\"empty0\" style=\"width: 0px; height: 0px; position: absolute; background-color:#8A2BE2\"></div>'
-show_cargo(cargo[select_method.value].usedBoxes);
-document.getElementById("insertmethod").innerText = cargo[select_method.value].insertMethod;
-//console.log(cargo);
-}
+    select_method.addEventListener("change", function(){
+        show_cargo(cargo[select_method.value].usedBoxes);
+    }
 );
 
 
 </script>
-    <div id="divTip1"
-              style="background-color: yellow; position: absolute; visibility: hidden; padding: 5px">
-            <span style="font-weight: bold">dane</span><br />
-         </div>
+
 </body>
